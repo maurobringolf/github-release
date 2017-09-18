@@ -24,7 +24,7 @@ will be classified as internal change. The following types are supported:
 * **documentation**
 * **internal**
 
-The changelog by default lists them in this order. If you have more ideas for default types, please file an issue or make a PR. There are plans for adding more types as arguments ( https://github.com/maurobringolf/github-release/issues/3 ).
+The changelog by default lists them in this order. If you have more ideas for default types, please file an issue or make a PR. There are plans for adding more types as arguments [( #3 )]( https://github.com/maurobringolf/github-release/issues/3 ).
 
 ## Usage
 
