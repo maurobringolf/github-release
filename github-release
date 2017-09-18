@@ -55,7 +55,7 @@ CREATE_CHANGELOG() {
   for COMMIT in $PARAGRAPH
    do
      TRIMMED_COMMIT="$(echo "$COMMIT" | xargs)"
-    if [ ! -z "$TRIMMED_COMMIT" ] && [ ! -z "$(echo "$TRIMMED_COMMIT" | grep "$TYPES_REGEX")" ]
+    if [ ! -z "$TRIMMED_COMMIT" ] && ! echo "$TRIMMED_COMMIT" | grep -q "$TYPES_REGEX"
       then
         FILTERED_PARAGRAPH="$FILTERED_PARAGRAPH$TRIMMED_COMMIT\n"
     fi
@@ -74,7 +74,7 @@ CREATE_CHANGELOG() {
 
 clear
 
-printf "|===> GitHub Release <===|\n\n"
+echo -e "|===> GitHub Release <===|\n\n"
 
 REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?github.com\/|git@github.com:([A-Za-z]+\/[A-Za-z]+)/\2/')
 
@@ -84,9 +84,9 @@ CONTENT=$(CREATE_CHANGELOG "${LATEST_RELEASE}")
 
 echo -e "$CONTENT"
 
-printf "This tool will draft a new release to ${REPOSITORY}. Its latest release is ${LATEST_RELEASE}.\n\n"
+echo -e "This tool will draft a new release to ${REPOSITORY}. Its latest release is ${LATEST_RELEASE}.\n\n"
 
-printf "What version would you like to release?\n-- "
+echo -e "What version would you like to release?\n-- "
 
 read -r NEXT_RELEASE
 
