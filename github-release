@@ -82,8 +82,6 @@ LATEST_RELEASE="$(git describe --tags --abbrev=0)"
 
 CONTENT=$(CREATE_CHANGELOG "${LATEST_RELEASE}")
 
-echo -e "$CONTENT"
-
 echo -e "This tool will draft a new release to ${REPOSITORY}. Its latest release is ${LATEST_RELEASE}.\n\n"
 
 echo -e "What version would you like to release?\n-- "
