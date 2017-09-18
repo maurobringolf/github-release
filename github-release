@@ -1,0 +1,101 @@
+#!/bin/bash
+
+GENERATE_POST_BODY() {
+  cat <<EOF
+{
+  "tag_name": "$NEXT_RELEASE",
+  "target_commitish": "master",
+  "name": "$NEXT_RELEASE",
+  "body": $FORMAT_CONTENT,
+  "draft": true,
+  "prerelease": false
+}
+EOF
+}
+
+CAPITALIZE() {
+  first_capital="$(echo $1|cut -c1|tr [a-z] [A-Z])"
+  rest_regular="$(echo $1|cut -c2-)"
+  echo "$first_capital$rest_regular"
+}
+
+CREATE_CHANGELOG() {
+
+  # Definition of default commit types
+  COMMIT_TYPES=( breaking bugfix feature frontend backend workflow testing documentation internal )
+
+  # String to accumulate changelog
+  CONTENT=""
+
+  # Get all commits with type annotations and make them paragraphs.
+  for TYPE in "${COMMIT_TYPES[@]}"
+    do
+      PARAGRAPH="$(git log $1..HEAD --format="* %s (%h)" --grep="^\[${TYPE}\]")"
+      if [ ! -z "$PARAGRAPH" ]
+        then
+          TITLE="$(CAPITALIZE $TYPE)"
+          PARAGRAPH="${PARAGRAPH//\[$TYPE\] /}"
+          CONTENT="$CONTENT## $TITLE\n\n$PARAGRAPH\n\n"
+      fi
+    done
+
+  # Regex used to find commits without types
+  TYPES_REGEX=""
+  for TYPE in ${COMMIT_TYPES[@]}
+    do
+      TYPES_REGEX="$TYPES_REGEX\[$TYPE\]\|"
+  done
+  TYPES_REGEX="$TYPES_REGEX\[skip-changelog\]"
+
+  # Get all commit without type annotation and make them another paragraph.
+  PARAGRAPH="$(git log $1..HEAD --format=";* %s (%h);")"
+  OIFS="$IFS"
+  IFS=";"
+  FILTERED_PARAGRAPH=""
+  for COMMIT in $PARAGRAPH
+   do
+     TRIMMED_COMMIT="$(echo "$COMMIT" | xargs)"
+    if [ ! -z "$TRIMMED_COMMIT" ] && [ -z "$(echo "$TRIMMED_COMMIT" | grep "$TYPES_REGEX")" ]
+      then
+        FILTERED_PARAGRAPH="$FILTERED_PARAGRAPH$TRIMMED_COMMIT\n"
+    fi
+  done
+  IFS="$OIFS"
+
+  # Only add to content if there are commits without type annotations.
+  if [ ! -z "$FILTERED_PARAGRAPH" ]
+   then
+     CONTENT="$CONTENT## Other\n\n$FILTERED_PARAGRAPH\n\n"
+  fi
+
+  # Output changelog
+  printf "$CONTENT"
+}
+
+clear
+
+printf "|===> GitHub Release <===|\n\n"
+
+REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?github.com\/|git@github.com:([A-Za-z]+\/[A-Za-z]+)/\2/')
+
+LATEST_RELEASE="$(git describe --tags --abbrev=0)"
+
+printf "This tool will draft a new release to ${REPOSITORY}. Its latest release is ${LATEST_RELEASE}.\n\n"
+
+printf "What version would you like to release?\n-- "
+
+read NEXT_RELEASE
+
+GENERATE_CHANGELOG_DIR="$(dirname $0)/github-release"
+
+CONTENT=$(CREATE_CHANGELOG ${LATEST_RELEASE})
+
+FORMAT_CONTENT=$(node -p -e 'JSON.stringify(process.argv[1])' "${CONTENT}")
+
+POST_BODY="$(GENERATE_POST_BODY)"
+
+RELEASE=$(curl --silent -H "Content-Type: application/json" -X POST --data "$(GENERATE_POST_BODY)" "https://api.github.com/repos/${REPOSITORY}/releases?access_token=${AUTOMATIC_RELEASE_GITHUB_TOKEN}")
+
+EDIT_URL="$(node -p -e 'JSON.parse(process.argv[1]).html_url.replace('/\\/tag\\//', '/edit/')' "${RELEASE}")"
+
+open $EDIT_URL
