@@ -6,7 +6,7 @@
 
 *A bash script to draft a new GitHub release with an automatically generated changelog.*
 
-Called inside a Git repository, this script generates a changelog based on commits from now back to the most recent tag and drafts a new tag and release via the GitHub API. It will directly open the edit page for the release in the browser, where it can be published, modified or discarded.
+Called inside a Git repository, this script generates a changelog based on commits from now back to the most recent tag and drafts a new tag and release via the GitHub API. It will directly open the edit page for the release in the browser, where it can be published, modified or discarded. **No tag or release will be published until you confirm it in the browser, the script simply prepares a draft for you.**
 
 Commits can be grouped by type to create separate paragraphs in the changelog. This is done by prefixing the commit message with a type annotation, i.e.
 
