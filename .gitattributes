@@ -1,2 +1,4 @@
-* export-ignore
-\!github-release export-ignore
+.gitattributes export-ignore
+circle.yml export-ignore
+LICENSE export-ignore
+README.md export-ignore
