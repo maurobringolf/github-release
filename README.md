@@ -26,6 +26,6 @@ will be classified as internal change. The following types are supported:
 
 The changelog by default lists them in this order. If you have more ideas for default types, please file an issue or make a PR. There are plans for adding more types as arguments ( https://github.com/maurobringolf/github-release/issues/3 ).
 
-## Usage
+## Usage
 
 This script should work with public repositories right away. For private repositories you need to provide a [GitHub API token](https://github.com/blog/1509-personal-api-tokens) because it creates the release using the GitHub releases API. For this script, the token should be put into an environment variable called `$AUTOMATIC_RELEASE_GITHUB_TOKEN`.
