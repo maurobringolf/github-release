@@ -14,8 +14,8 @@ EOF
 }
 
 CAPITALIZE() {
-  first_capital="$(echo $1|cut -c1|tr [a-z] [A-Z])"
-  rest_regular="$(echo $1|cut -c2-)"
+  first_capital="$(echo "$1"|cut -c1|tr '[:lower:]' '[:upper:]' )"
+  rest_regular="$(echo "$1"|cut -c2-)"
   echo "$first_capital$rest_regular"
 }
 
@@ -30,10 +30,10 @@ CREATE_CHANGELOG() {
   # Get all commits with type annotations and make them paragraphs.
   for TYPE in "${COMMIT_TYPES[@]}"
     do
-      PARAGRAPH="$(git log $1..HEAD --format="* %s (%h)" --grep="^\[${TYPE}\]")"
+      PARAGRAPH="$(git log "$1"..HEAD --format="* %s (%h)" --grep="^\[${TYPE}\]")"
       if [ ! -z "$PARAGRAPH" ]
         then
-          TITLE="$(CAPITALIZE $TYPE)"
+          TITLE="$(CAPITALIZE "$TYPE")"
           PARAGRAPH="${PARAGRAPH//\[$TYPE\] /}"
           CONTENT="$CONTENT## $TITLE\n\n$PARAGRAPH\n\n"
       fi
@@ -41,21 +41,21 @@ CREATE_CHANGELOG() {
 
   # Regex used to find commits without types
   TYPES_REGEX=""
-  for TYPE in ${COMMIT_TYPES[@]}
+  for TYPE in "${COMMIT_TYPES[@]}"
     do
       TYPES_REGEX="$TYPES_REGEX\[$TYPE\]\|"
   done
   TYPES_REGEX="$TYPES_REGEX\[skip-changelog\]"
 
   # Get all commit without type annotation and make them another paragraph.
-  PARAGRAPH="$(git log $1..HEAD --format=";* %s (%h);")"
+  PARAGRAPH="$(git log "$1"..HEAD --format=";* %s (%h);")"
   OIFS="$IFS"
   IFS=";"
   FILTERED_PARAGRAPH=""
   for COMMIT in $PARAGRAPH
    do
      TRIMMED_COMMIT="$(echo "$COMMIT" | xargs)"
-    if [ ! -z "$TRIMMED_COMMIT" ] && [ -z "$(echo "$TRIMMED_COMMIT" | grep "$TYPES_REGEX")" ]
+    if [ ! -z "$TRIMMED_COMMIT" ] && [ ! -z "$(echo "$TRIMMED_COMMIT" | grep "$TYPES_REGEX")" ]
       then
         FILTERED_PARAGRAPH="$FILTERED_PARAGRAPH$TRIMMED_COMMIT\n"
     fi
@@ -69,7 +69,7 @@ CREATE_CHANGELOG() {
   fi
 
   # Output changelog
-  printf "$CONTENT"
+  echo -e "$CONTENT"
 }
 
 clear
@@ -80,22 +80,20 @@ REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?gi
 
 LATEST_RELEASE="$(git describe --tags --abbrev=0)"
 
+CONTENT=$(CREATE_CHANGELOG "${LATEST_RELEASE}")
+
+echo -e "$CONTENT"
+
 printf "This tool will draft a new release to ${REPOSITORY}. Its latest release is ${LATEST_RELEASE}.\n\n"
 
 printf "What version would you like to release?\n-- "
 
-read NEXT_RELEASE
-
-GENERATE_CHANGELOG_DIR="$(dirname $0)/github-release"
-
-CONTENT=$(CREATE_CHANGELOG ${LATEST_RELEASE})
+read -r NEXT_RELEASE
 
 FORMAT_CONTENT=$(node -p -e 'JSON.stringify(process.argv[1])' "${CONTENT}")
-
-POST_BODY="$(GENERATE_POST_BODY)"
 
 RELEASE=$(curl --silent -H "Content-Type: application/json" -X POST --data "$(GENERATE_POST_BODY)" "https://api.github.com/repos/${REPOSITORY}/releases?access_token=${AUTOMATIC_RELEASE_GITHUB_TOKEN}")
 
 EDIT_URL="$(node -p -e 'JSON.parse(process.argv[1]).html_url.replace('/\\/tag\\//', '/edit/')' "${RELEASE}")"
 
-open $EDIT_URL
+open "$EDIT_URL"
