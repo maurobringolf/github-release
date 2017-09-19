@@ -72,9 +72,14 @@ CREATE_CHANGELOG() {
   echo -e "$CONTENT"
 }
 
-clear
-
 echo -e "|===> GitHub Release <===|\n\n"
+
+# Exit if not in a Git repository.
+if [ "true" != "$(git rev-parse --is-inside-work-tree 2> /dev/null)" ]
+  then
+    echo -e "This does not seem to be a Git repository.\n"
+    exit
+fi
 
 REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?github.com\/|git@github.com:([A-Za-z]+\/[A-Za-z]+)/\2/')
 
