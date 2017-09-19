@@ -74,7 +74,8 @@ CREATE_CHANGELOG() {
 
 echo -e "|===> GitHub Release <===|\n\n"
 
-if [ ! -d ./.git ]
+# Exit if not in a Git repository.
+if [ "true" != "$(git rev-parse --is-inside-work-tree 2> /dev/null)" ]
   then
     echo -e "This does not seem to be a Git repository.\n"
     exit
