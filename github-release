@@ -1,5 +1,9 @@
 #!/bin/bash
 
+--VERSION() {
+  echo "github-release v1.0.2"
+}
+
 GENERATE_POST_BODY() {
   cat <<EOF
 {
@@ -81,6 +85,17 @@ CREATE_CHANGELOG() {
   # Output changelog
   echo -e "$CONTENT"
 }
+
+#
+# Main script
+#
+
+if [ "$1" == "--version" ]
+  then
+    --VERSION
+    exit 0
+fi
+
 
 echo -e "|===> GitHub Release <===|\n\n"
 
