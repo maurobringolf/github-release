@@ -30,7 +30,12 @@ CREATE_CHANGELOG() {
   # Get all commits with type annotations and make them paragraphs.
   for TYPE in "${COMMIT_TYPES[@]}"
     do
-      PARAGRAPH="$(git log "$1"..HEAD --format="* %s (%h)" --grep="^\[${TYPE}\]")"
+      if [ -z "$1" ]
+        then
+          PARAGRAPH="$(git log --format="* %s (%h)" --grep="^\[${TYPE}\]")"
+        else
+          PARAGRAPH="$(git log "$1"..HEAD --format="* %s (%h)" --grep="^\[${TYPE}\]")"
+      fi
       if [ ! -z "$PARAGRAPH" ]
         then
           TITLE="$(CAPITALIZE "$TYPE")"
@@ -48,7 +53,12 @@ CREATE_CHANGELOG() {
   TYPES_REGEX="$TYPES_REGEX\[skip-changelog\]"
 
   # Get all commit without type annotation and make them another paragraph.
-  PARAGRAPH="$(git log "$1"..HEAD --format=";* %s (%h);")"
+  if [ -z "$1" ]
+    then
+      PARAGRAPH="$(git log --format=";* %s (%h);")"
+    else
+      PARAGRAPH="$(git log "$1"..HEAD --format=";* %s (%h);")"
+  fi
   OIFS="$IFS"
   IFS=";"
   FILTERED_PARAGRAPH=""
@@ -83,11 +93,22 @@ fi
 
 REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?github.com\/|git@github.com:([A-Za-z]+\/[A-Za-z]+)/\2/')
 
-LATEST_RELEASE="$(git describe --tags --abbrev=0)"
+if [ -z "$(git tag)" ]
+  then
+    CONTENT=$(CREATE_CHANGELOG)
+  else
+    LATEST_RELEASE="$(git describe --tags --abbrev=0)"
+    CONTENT=$(CREATE_CHANGELOG "${LATEST_RELEASE}")
+fi
 
-CONTENT=$(CREATE_CHANGELOG "${LATEST_RELEASE}")
+echo -e "This tool will draft a new release to ${REPOSITORY}."
 
-echo -e "This tool will draft a new release to ${REPOSITORY}. Its latest release is ${LATEST_RELEASE}.\n\n"
+if [ -z "$(git tag)" ]
+  then
+    echo -e "This seems its first release. Congratulations!"
+  else
+    echo -e "Its latest release is ${LATEST_RELEASE}.\n\n"
+fi
 
 echo -e "What version would you like to release?\n-- "
 
