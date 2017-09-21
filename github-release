@@ -120,7 +120,7 @@ echo -e "This tool will draft a new release to ${REPOSITORY}."
 
 if [ -z "$(git tag)" ]
   then
-    echo -e "This seems its first release. Congratulations!"
+    echo -e "This seems to be its first release. Congratulations!"
   else
     echo -e "Its latest release is ${LATEST_RELEASE}.\n\n"
 fi
