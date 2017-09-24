@@ -23,6 +23,10 @@ CAPITALIZE() {
   echo "$first_capital$rest_regular"
 }
 
+HORIZONTAL_LINE() {
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+}
+
 CREATE_CHANGELOG() {
 
   # Definition of default commit types
@@ -106,6 +110,19 @@ if [ "true" != "$(git rev-parse --is-inside-work-tree 2> /dev/null)" ]
     exit
 fi
 
+while getopts ":p" OPTION
+  do
+    case $OPTION in
+      p)
+        PREVIEW=true
+        ;;
+      \?)
+        echo "Invalid option: -$OPTARG"
+        exit
+        ;;
+    esac
+done
+
 REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?github.com\/|git@github.com:([A-Za-z]+\/[A-Za-z]+)/\2/')
 
 if [ -z "$(git tag)" ]
@@ -114,6 +131,14 @@ if [ -z "$(git tag)" ]
   else
     LATEST_RELEASE="$(git describe --tags --abbrev=0)"
     CONTENT=$(CREATE_CHANGELOG "${LATEST_RELEASE}")
+fi
+
+if [ "$PREVIEW" = true ]
+  then
+    HORIZONTAL_LINE
+    echo "$CONTENT"
+    HORIZONTAL_LINE
+    exit
 fi
 
 echo -e "This tool will draft a new release to ${REPOSITORY}."
