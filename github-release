@@ -27,6 +27,20 @@ HORIZONTAL_LINE() {
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 }
 
+SHOW_HELP() {
+  cat <<EOF
+Usage:
+  github-release --version
+  github-release [-p]
+  github-release [-h]
+
+Options:
+  --version Print version.
+  -p        Show a preview of the changelog without releasing a new version.
+  -h        Show this list describing usage and options.
+EOF
+}
+
 CREATE_CHANGELOG() {
 
   # Definition of default commit types
@@ -110,11 +124,16 @@ if [ "true" != "$(git rev-parse --is-inside-work-tree 2> /dev/null)" ]
     exit
 fi
 
-while getopts ":p" OPTION
+# Parse all options
+while getopts ":ph" OPTION
   do
     case $OPTION in
       p)
         PREVIEW=true
+        ;;
+      h)
+        SHOW_HELP
+        exit
         ;;
       \?)
         echo "Invalid option: -$OPTARG"
@@ -123,8 +142,7 @@ while getopts ":p" OPTION
     esac
 done
 
-REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?github.com\/|git@github.com:([A-Za-z]+\/[A-Za-z]+)/\2/')
-
+# Generate changelog either from last tag or from beginning
 if [ -z "$(git tag)" ]
   then
     CONTENT=$(CREATE_CHANGELOG)
@@ -133,6 +151,7 @@ if [ -z "$(git tag)" ]
     CONTENT=$(CREATE_CHANGELOG "${LATEST_RELEASE}")
 fi
 
+# In preview mode, show changelog and exit
 if [ "$PREVIEW" = true ]
   then
     HORIZONTAL_LINE
@@ -140,6 +159,9 @@ if [ "$PREVIEW" = true ]
     HORIZONTAL_LINE
     exit
 fi
+
+# Find remote repository
+REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?github.com\/|git@github.com:([A-Za-z]+\/[A-Za-z]+)/\2/')
 
 echo -e "This tool will draft a new release to ${REPOSITORY}."
 

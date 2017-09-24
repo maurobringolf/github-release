@@ -28,4 +28,18 @@ The changelog by default lists them in this order. If you have more ideas for de
 
 ## Usage
 
-This script should work with public repositories right away. For private repositories you need to provide a [GitHub API token](https://github.com/blog/1509-personal-api-tokens) because it creates the release using the GitHub releases API. For this script, the token should be put into an environment variable called `$AUTOMATIC_RELEASE_GITHUB_TOKEN`. If you think this is bad practice, tell me why and we can provide alternatives.
+This script should work with public repositories right away. For private repositories you need to provide a [GitHub API token](https://github.com/blog/1509-personal-api-tokens) because it creates the release using the GitHub releases API. For this script, the token should be put into an environment variable called `$AUTOMATIC_RELEASE_GITHUB_TOKEN` (If you think this is bad practice, tell me why and we can provide alternatives).
+
+This is the complete list of options and flags, also available via `github-release -h`:
+
+```
+Usage:
+  github-release --version
+  github-release [-p]
+  github-release [-h]
+
+Options:
+  --version Print version.
+  -p        Show a preview of the changelog without releasing a new version.
+  -h        Show this list describing usage and options.
+```
