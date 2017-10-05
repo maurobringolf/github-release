@@ -148,18 +148,20 @@ if [ -z "$(git tag)" ]
     CONTENT=$(CREATE_CHANGELOG "${LATEST_RELEASE}")
 fi
 
+
+if [ -z "$CONTENT" ]
+  then
+    echo -e "No changes made since last release $LATEST_RELEASE."
+	exit
+fi
+
 # In preview mode, show changelog and exit
 if [ "$PREVIEW" = true ]
   then
-  	if [ -z "$CONTENT" ]
-		then
-			echo -e "No changes made since last release."
-	else
-    	HORIZONTAL_LINE
-    	echo "$CONTENT"
-    	HORIZONTAL_LINE
-	fi
-    exit
+    HORIZONTAL_LINE
+    echo "$CONTENT"
+    HORIZONTAL_LINE
+  exit
 fi
 
 # Find remote repository
