@@ -4,6 +4,8 @@
 [![License](https://img.shields.io/github/license/maurobringolf/github-release.svg)]()
 [![CircleCI branch](https://img.shields.io/circleci/project/github/maurobringolf/github-release/master.svg)]()
 
+[Usage](#usage) | [Alternative solutions](#alternative-solutions)
+
 *A bash script to draft a new GitHub release with an automatically generated changelog.*
 
 Called inside a Git repository, this script generates a changelog based on commits from now back to the most recent tag and drafts a new tag and release via the GitHub API. It will directly open the edit page for the release in the browser, where it can be published, modified or discarded. **No tag or release will be published until you confirm it in the browser, the script simply prepares a draft for you.**
@@ -24,7 +26,7 @@ will be classified as internal change. The following types are supported:
 * **documentation**
 * **internal**
 
-The changelog by default lists them in this order. If you have more ideas for default types, please file an issue or make a PR. There are plans for adding more types as arguments [( #3 )]( https://github.com/maurobringolf/github-release/issues/3 ).
+The changelog by default lists them in this order. If you have more ideas for commit types, please file an issue or make a PR. There are plans for supporting custom types as command line argument [( #3 )]( https://github.com/maurobringolf/github-release/issues/3 ).
 
 ## Usage
 
@@ -43,3 +45,14 @@ Options:
   -p        Show a preview of the changelog without releasing a new version.
   -h        Show this list describing usage and options.
 ```
+
+## Alternative solutions
+
+There is a range of tools solving the same problem as this one. The reason why I wrote my own is because *why not*. This is a pretty bad reason, so **you should probably consider using one of these instead:**
+
+* [commitizen/cz-cli](https://github.com/commitizen/cz-cli)
+* [conventional-changelog/conventional-github-releaser](https://github.com/conventional-changelog/conventional-github-releaser)
+* [zeit/release](https://github.com/zeit/release)
+* [skywinder/github-changelog-generator](https://github.com/skywinder/github-changelog-generator)
+
+If, however you want *something to hack on*, use this one by all means! It is way simpler to understand and I will be happy to discuss problems and improvements.
