@@ -164,11 +164,28 @@ if [ "$PREVIEW" = true ]
   exit
 fi
 
-# Find remote repository
-REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?github.com\/|git@github.com:([A-Za-z]+\/[A-Za-z]+)/\2/')
+# obtain remote repository details
+function get_repository_details
+{
+  read -r -p 'Repository URL > ' REPO_URL
+  read -r -p 'Default Branch > ' REPO_BRANCH
+}
 
 GREY_COLOR="\033[0;37m"
 NO_COLOR="\033[0m"
+
+# if origin isn't set
+if [[ ! $(git config --get remote.origin.url) ]]
+  then
+    echo -e "Remote ${GREY_COLOR}origin${NO_COLOR} missing"
+    echo -e "You need to specify the remote repository manually"
+    get_repository_details
+    git remote add origin "${REPO_URL}" -m "${REPO_BRANCH}"
+    echo -e "Remote ${GREY_COLOR}origin${NO_COLOR} set successfully"
+fi
+
+# Obtained valid 'origin' remote, set REPOSITORY now
+REPOSITORY=$(git config --get remote.origin.url | sed -E 's/https?:\/\/(www.)?github.com\/|git@github.com:([A-Za-z]+\/[A-Za-z]+)/\2/')
 
 echo -e "Detected remote repository ${GREY_COLOR}${REPOSITORY}${NO_COLOR}."
 
